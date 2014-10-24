@@ -42,7 +42,6 @@ OAuth.registerService('quickbooks', 1, urls, function(oauthBinding, query) {
   }
 
   var identity = {id: parsedResponse.UserResponse.User[0].$.Id };
-  //here i'm parinsing XML with regexp because I don't want any dependencies and I'm a bad person
   QuickBooks.whitelistedFields.forEach(function(field) {
     var xmlField = capitaliseFirstLetter(field);
     identity[field] = parsedResponse.UserResponse.User[0][xmlField][0];
