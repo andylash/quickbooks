@@ -1,4 +1,4 @@
-/* global QuickBooks, OAuth */
+/* global QuickBooks, OAuth, xml2js */
 "use strict";
 
 var urls = {
@@ -8,18 +8,61 @@ var urls = {
   authenticate: "https://appcenter.intuit.com/Connect/Begin"
 };
 
+var capitaliseFirstLetter = function(str) {
+    return str.charAt(0).toUpperCase() + str.slice(1);
+};
+
+
+QuickBooks.whitelistedFields = ['firstName', 'lastName', 'emailAddress', 'screenName', 'isVerified'];
+
 OAuth.registerService('quickbooks', 1, urls, function(oauthBinding, query) {
 
-  var serviceData = {
-    id: 'quickbooks',
+  //this returns a response in XML.  It doesn't appear to respect JSON as a requested output, it looks
+  // like this:
+  /*
+  <?xml version="1.0" encoding="utf-8"?>
+  <UserResponse xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://platform.intuit.com/api/v1">
+    <ErrorCode>0</ErrorCode>
+    <ServerTime>2014-10-23T22:53:28.9018544Z</ServerTime>
+    <User Id="64912120.gxm9">
+      <FirstName>andy</FirstName>
+      <LastName>lash</LastName>
+      <EmailAddress>andy+qb@opstarts.com</EmailAddress>
+      <ScreenName>andy+qb@opstarts.com</ScreenName>
+      <IsVerified>true</IsVerified>
+    </User>
+  </UserResponse>
+  */
+  var response = oauthBinding.get('https://appcenter.intuit.com/api/v1/user/current');
+  var parsedResponse = xml2js.parseStringSync(response.content);
+
+  if (parsedResponse.UserResponse.ErrorMessage) {
+    throw new Meteor.Error(500, "Failed to get use info from quickbooks: " +
+      parsedResponse.UserResponse.ErrorMessage);
+  }
+
+  var identity = {id: parsedResponse.UserResponse.User[0].$.Id };
+  //here i'm parinsing XML with regexp because I don't want any dependencies and I'm a bad person
+  QuickBooks.whitelistedFields.forEach(function(field) {
+    var xmlField = capitaliseFirstLetter(field);
+    identity[field] = parsedResponse.UserResponse.User[0][xmlField][0];
+  });
+
+
+  var serviceData = _.extend({
     name: 'quickbooks',
     accessToken: OAuth.sealSecret(oauthBinding.accessToken),
     accessTokenSecret: OAuth.sealSecret(oauthBinding.accessTokenSecret),
     realmId: query && query.realmId,
-  };
+  }, identity);
 
   return {
-    serviceData: serviceData
+    serviceData: serviceData,
+    options: {
+      profile: {
+        name: identity.screenName
+      }
+    }
   };
 });
 

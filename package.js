@@ -19,6 +19,7 @@ Package.onUse(function(api) {
   api.use('random', 'client');
   api.use('underscore', 'server');
   api.use('service-configuration', ['client', 'server']);
+  api.use('peerlibrary:xml2js', 'server');
 
   api.export('QuickBooks');
 
