@@ -1,3 +1,4 @@
+/* jshint camelcase:false */
 /* global QuickBooks, OAuth, xml2js */
 "use strict";
 
@@ -54,6 +55,9 @@ OAuth.registerService('quickbooks', 1, urls, function(oauthBinding, query) {
     accessTokenSecret: OAuth.sealSecret(oauthBinding.accessTokenSecret),
     realmId: query && query.realmId,
   }, identity);
+
+  //verified_email is the way the accounts-meld package expects this data
+  serviceData.verified_email = serviceData.isVerified;
 
   return {
     serviceData: serviceData,
