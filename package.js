@@ -3,7 +3,7 @@
 Package.describe({
   summary: "Quickbooks API",
   version: "0.1.1",
-  name: "quickbooks",
+  name: "andylash:quickbooks",
   git: "https://github.com/andylash/quickbooks.git",
 });
 
