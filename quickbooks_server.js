@@ -16,7 +16,7 @@ var capitaliseFirstLetter = function(str) {
 
 QuickBooks.whitelistedFields = ['firstName', 'lastName', 'emailAddress', 'screenName', 'isVerified'];
 
-OAuth.registerService('quickbooks', 1, urls, function(oauthBinding, query) {
+OAuth.registerService('quickbooks', 1, urls, function(oauthBinding, options) {
 
   //this returns a response in XML.  It doesn't appear to respect JSON as a requested output, it looks
   // like this:
@@ -53,7 +53,7 @@ OAuth.registerService('quickbooks', 1, urls, function(oauthBinding, query) {
     name: 'quickbooks',
     accessToken: OAuth.sealSecret(oauthBinding.accessToken),
     accessTokenSecret: OAuth.sealSecret(oauthBinding.accessTokenSecret),
-    realmId: query && query.realmId,
+    realmId: options && options.query && options.query.realmId,
   }, identity);
 
   //verified_email is the way the accounts-meld package expects this data
