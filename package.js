@@ -11,7 +11,7 @@ Package.onUse(function(api) {
   api.versionsFrom('METEOR@0.9.0');
 
   Npm.depends({
-    'node-quickbooks': "1.0.3"
+    'node-quickbooks': "1.0.25"
   });
 
   api.use('http', ['client', 'server']);
